@@ -11,3 +11,32 @@ body {
     align-items: center;
     min-height: 100vh;
 }
+
+.chat-container {
+    width: 500px;
+    height: 700px;
+    background: white;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.chat-header {
+    background: #222;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.chat-header h1 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.chat-header p {
+    margin: 5px 0 0;
+    font-size: 13px;
+    opacity: 0.8;
+}
