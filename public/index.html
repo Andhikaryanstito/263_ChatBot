@@ -7,31 +7,108 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <h1>Chatbot AI</h1>
-            <p>NVIDIA Nemotron 3 Ultra</p>
-        </div>
-        <div id="chat-box" class="chat-box">
-            <div class="message bot">
-                <div class="message-content">
-                    Halo! Ada yang bisa saya bantu?
+<div class="app-layout">
+
+    <!-- Sidebar Kiri -->
+    <aside class="sidebar">
+        <div>
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                Chatbot AI
+            </div>
+            <button class="new-chat-btn" onclick="newChat()">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Chat Baru
+            </button>
+
+            <div class="sidebar-section">
+                <span class="section-label">RIWAYAT</span>
+                <div class="session-item active">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24">
+                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Sesi ini
                 </div>
             </div>
         </div>
-        <form id="chat-form" class="chat-form">
-            <input
-                type="text"
-                id="user-input"
-                placeholder="Ketik pesan..."
-                autocomplete="off"
-                required
-            >
-            <button type="submit">
-                Kirim
-            </button>
-        </form>
-    </div>
-    <script src="script.js"></script>
+
+        <div class="model-card">
+            <div class="model-header">
+                <div class="status-dot"></div>
+                <span class="model-name">NVIDIA Nemotron</span>
+            </div>
+            <div class="model-sub">3 Ultra · OpenRouter Free</div>
+        </div>
+    </aside>
+
+    <!-- Area Utama -->
+    <main class="main-workspace">
+        <!-- Topbar -->
+        <div class="topbar">
+            <div class="topbar-left">
+                <span class="crumb">Chatbot AI</span>
+                <span class="sep">/</span>
+                <span class="crumb-active">Sesi Baru</span>
+            </div>
+            <span class="pill-badge">NVIDIA Nemotron 3 Ultra</span>
+        </div>
+
+        <!-- Chat Messages -->
+        <div id="chat-box" class="chat-box">
+            <!-- Welcome Hero (tampil saat belum ada pesan) -->
+            <div class="welcome-hero" id="welcome-hero">
+                <div class="hero-badge">NVIDIA Nemotron 3 Ultra</div>
+                <h2>Ada yang bisa saya bantu?</h2>
+                <p>Saya adalah asisten AI cerdas berbahasa Indonesia. Tanyakan apa saja!</p>
+                <div class="prompt-grid">
+                    <button class="prompt-card" onclick="quickPrompt('Jelaskan apa itu kecerdasan buatan')">
+                        <span class="card-title">🤖 Kecerdasan Buatan</span>
+                        <span class="card-desc">Jelaskan apa itu kecerdasan buatan</span>
+                    </button>
+                    <button class="prompt-card" onclick="quickPrompt('Buatkan contoh kode Express.js sederhana')">
+                        <span class="card-title">💻 Express.js</span>
+                        <span class="card-desc">Buatkan contoh kode Express.js sederhana</span>
+                    </button>
+                    <button class="prompt-card" onclick="quickPrompt('Tips belajar pemrograman web untuk pemula')">
+                        <span class="card-title">📚 Tips Belajar</span>
+                        <span class="card-desc">Tips belajar pemrograman web untuk pemula</span>
+                    </button>
+                    <button class="prompt-card" onclick="quickPrompt('Apa perbedaan frontend dan backend?')">
+                        <span class="card-title">🌐 Web Dev</span>
+                        <span class="card-desc">Apa perbedaan frontend dan backend?</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-wrapper">
+            <form id="chat-form" class="chat-form" onsubmit="sendMessage(event)">
+                <input
+                    type="text"
+                    id="user-input"
+                    placeholder="Ketik pesan..."
+                    autocomplete="off"
+                    required
+                >
+                <button type="submit" id="send-btn">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24">
+                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Kirim
+                </button>
+            </form>
+            <div class="footer-note">NVIDIA Nemotron 3 Ultra via OpenRouter · Pemrograman Web Server</div>
+        </div>
+    </main>
+
+</div>
+<script src="script.js"></script>
 </body>
 </html>
