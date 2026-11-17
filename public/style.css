@@ -40,3 +40,42 @@ body {
     font-size: 13px;
     opacity: 0.8;
 }
+
+.chat-box {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.message {
+    display: flex;
+}
+
+.message-content {
+    max-width: 75%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.message.user {
+    justify-content: flex-end;
+}
+
+.message.user .message-content {
+    background: #222;
+    color: white;
+}
+
+.message.bot {
+    justify-content: flex-start;
+}
+
+.message.bot .message-content {
+    background: #e9e9e9;
+    color: #222;
+}
