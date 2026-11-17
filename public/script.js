@@ -1,30 +1,240 @@
-﻿const chatForm = document.getElementById("chat-form");
+const chatForm = document.getElementById("chat-form");
 const userInput = document.getElementById("user-input");
 const chatBox = document.getElementById("chat-box");
 
 const messages = [];
 
+// Fungsi untuk mengubah format Markdown (seperti **tebal**) menjadi HTML yang rapi
 function formatMarkdown(text) {
     if (!text) return "";
     return text
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
-        .replace(/\*\*(.*?)\*\*/g, '<strong></strong>')
-        .replace(/__(.*?)__/g, '<strong></strong>')
-        .replace(/\*(.*?)\*/g, '<em></em>')
-        .replace(/([^]+)/g, '<code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;font-family:monospace;"></code>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/__(.*?)__/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`([^`]+)`/g, '<code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;font-family:monospace;">$1</code>')
         .replace(/\n/g, '<br>');
 }
 
 function addMessage(text, sender) {
+
     const message = document.createElement("div");
+
     message.classList.add("message", sender);
+
     const content = document.createElement("div");
+
     content.classList.add("message-content");
+
     content.innerHTML = formatMarkdown(text);
+
     message.appendChild(content);
+
     chatBox.appendChild(message);
+
     chatBox.scrollTop = chatBox.scrollHeight;
+
     return content;
 }
+
+
+chatForm.addEventListener("submit", async (event) => {
+
+    event.preventDefault();
+
+    const message = userInput.value.trim();
+
+    if (!message) {
+        return;
+    }
+
+
+    // =========================
+    // Tampilkan pesan user
+    // =========================
+
+    addMessage(message, "user");
+
+
+    // Simpan pesan user
+    messages.push({
+        role: "user",
+        content: message
+    });
+
+
+    // Kosongkan input
+    userInput.value = "";
+
+
+    // Disable input sementara
+    userInput.disabled = true;
+
+    const button = chatForm.querySelector("button");
+
+    button.disabled = true;
+    button.textContent = "Menunggu...";
+
+
+    // =========================
+    // Buat bubble AI kosong
+    // =========================
+
+    const botContent = addMessage("", "bot");
+
+    let botResponse = "";
+
+
+    try {
+
+        const response = await fetch("/api/chat", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                messages: messages
+            })
+
+        });
+
+
+        if (!response.ok) {
+
+            const errorData = await response.json();
+
+            throw new Error(
+                errorData.error || "Terjadi kesalahan"
+            );
+        }
+
+
+        // =========================
+        // Baca streaming response
+        // =========================
+
+        const reader = response.body.getReader();
+
+        const decoder = new TextDecoder();
+
+        let buffer = "";
+
+
+        while (true) {
+
+            const { done, value } = await reader.read();
+
+
+            if (done) {
+                break;
+            }
+
+
+            // Decode data
+            buffer += decoder.decode(value, {
+                stream: true
+            });
+
+
+            // Pisahkan berdasarkan newline
+            const lines = buffer.split("\n");
+
+
+            // Simpan bagian yang belum lengkap
+            buffer = lines.pop();
+
+
+            for (const line of lines) {
+
+                const trimmedLine = line.trim();
+
+
+                if (!trimmedLine) {
+                    continue;
+                }
+
+
+                if (!trimmedLine.startsWith("data:")) {
+                    continue;
+                }
+
+
+                const data = trimmedLine
+                    .slice(5)
+                    .trim();
+
+
+                if (data === "[DONE]") {
+                    continue;
+                }
+
+
+                try {
+
+                    const token = JSON.parse(data);
+
+
+                    // Tambahkan token
+                    botResponse += token;
+
+
+                    // Update tampilan dengan Markdown yang rapi (bold, italic, baris baru)
+                    botContent.innerHTML = formatMarkdown(botResponse);
+
+
+                    // Auto scroll
+                    chatBox.scrollTop =
+                        chatBox.scrollHeight;
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Gagal membaca token:",
+                        error
+                    );
+
+                }
+
+            }
+
+        }
+
+
+        // =========================
+        // Simpan response AI
+        // =========================
+
+        messages.push({
+            role: "assistant",
+            content: botResponse
+        });
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        botContent.textContent =
+            "Maaf, terjadi kesalahan: " +
+            error.message;
+
+    } finally {
+
+        // Aktifkan kembali input
+        userInput.disabled = false;
+
+        button.disabled = false;
+
+        button.textContent = "Kirim";
+
+        userInput.focus();
+
+    }
+
+});
