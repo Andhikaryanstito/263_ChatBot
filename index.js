@@ -7,7 +7,8 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(express.json());
+// Proteksi keamanan: Batasi ukuran payload JSON untuk mencegah serangan DoS
+app.use(express.json({ limit: '100kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'Public')));
 
@@ -21,7 +22,15 @@ app.post("/api/chat", async (req, res) => {
 
     if (!message || !Array.isArray(message)) {
       return res.status(400).json({
-        error: "message harus berupa array."
+        error: "Format pesan tidak valid (harus berupa array riwayat percakapan)."
+      });
+    }
+
+    // Keamanan: Cek keberadaan API Key secara aman
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({
+        error: "API Key belum dikonfigurasi di server environment."
       });
     }
 
@@ -40,7 +49,7 @@ app.post("/api/chat", async (req, res) => {
     };
 
     // Gabungkan system prompt dengan pesan user
-    const fullMessages = [systemPrompt, ...message.filter(m => m.role !== 'system')];
+    const fullMessages = [systemPrompt, ...message.filter(m => m && m.role !== 'system')];
 
     let response = null;
 
@@ -51,7 +60,7 @@ app.post("/api/chat", async (req, res) => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`
+            "Authorization": `Bearer ${apiKey}`
           },
           body: JSON.stringify({
             model: modelName,
@@ -68,14 +77,13 @@ app.post("/api/chat", async (req, res) => {
         break;
       }
 
-      console.warn(`Model ${modelName} terkena limit (${response.status}), otomatis mencoba model cadangan...`);
+      console.warn(`Model ${modelName} terkena limit (${response.status}), mencoba model cadangan...`);
     }
     
     if (!response || !response.ok) {
-      const errorData = await response.text();
-      console.error("Error response from OpenRouter API:", errorData);
-      return res.status(response ? response.status : 500).json({
-        error: errorData
+      console.error("OpenRouter API gagal di semua model candidate.");
+      return res.status(response ? response.status : 502).json({
+        error: "Layanan model AI sedang sibuk. Silakan coba kembali dalam beberapa saat."
       });
     }
 
@@ -131,14 +139,14 @@ app.post("/api/chat", async (req, res) => {
     res.end();
 
   } catch (error) {
-    console.error("Server Error:", error);
+    console.error("Server Error:", error.message);
 
     if (!res.headersSent) {
       res.status(500).json({
-        error: "Terjadi kesalahan pada server"
+        error: "Terjadi kesalahan internal pada server."
       });
     } else {
-      res.write(`data: ${JSON.stringify("Terjadi kesalahan pada server")}\n\n`);
+      res.write(`data: ${JSON.stringify("Terjadi kesalahan pada koneksi server.")}\n\n`);
       res.end();
     }
   }
