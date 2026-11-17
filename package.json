@@ -1,0 +1,14 @@
+﻿{
+  "name": "263_chatbot",
+  "version": "1.0.0",
+  "description": "Chatbot AI Express JS dengan OpenRouter",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": ["chatbot", "express", "openrouter"],
+  "author": "Andhika",
+  "license": "ISC",
+  "type": "commonjs"
+}
