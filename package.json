@@ -7,8 +7,16 @@
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
-  "keywords": ["chatbot", "express", "openrouter"],
+  "keywords": [
+    "chatbot",
+    "express",
+    "openrouter"
+  ],
   "author": "Andhika",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
 }
